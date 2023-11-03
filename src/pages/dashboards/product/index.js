@@ -37,7 +37,7 @@ const Product = () => {
     // Clear the alert after 2 seconds
     setTimeout(() => {
       setAlertMessage('');
-    }, 2000);
+    }, 1000);
   };
 
   return (

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import {
   Grid,
@@ -17,17 +17,16 @@ import {
   TableRow,
 } from '@mui/material';
 import { removeFromCart, clearCart } from 'src/store/apps/cart';
+import { PayPalButtons } from '@paypal/react-paypal-js';
 
 const Cart = () => {
   const cartItems = useSelector((state) => state.cart);
   const dispatch = useDispatch();
   const [alertMessage, setAlertMessage] = React.useState('');
-
-  const handleRemoveFromCart = (productId) => {
-    dispatch(removeFromCart({ id: productId }));
-    setAlertMessage('Product removed from Cart');
-  };
-
+  
+  
+  
+  
   const handleClearCart = () => {
     dispatch(clearCart());
     setAlertMessage('Cart cleared');
@@ -43,13 +42,20 @@ const Cart = () => {
     return totalPrice * gstPercentage;
   };
 
+  const handleRemoveFromCart = (productId) => {
+    dispatch(removeFromCart({ id: productId }));
+    setAlertMessage('Product removed from Cart');
+    setPaypalAmount(calculateTotalPrice() + calculateGST());
+  };
+
+    const [paypalAmount, setPaypalAmount] = useState(calculateTotalPrice() + calculateGST());
   return (
     <div>
       <h2>Cart</h2>
       <Snackbar
         open={alertMessage !== ''}
         message={alertMessage}
-        autoHideDuration={2000}
+        autoHideDuration={1000}
         anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
         onClose={() => setAlertMessage('')}
       />
@@ -111,20 +117,51 @@ const Cart = () => {
               </TableBody>
             </Table>
           </TableContainer>
-          <Button
-            variant="contained"
-            color="primary"
-            style={{ marginTop: '20px' }}
-          >
-            Pay Now
-          </Button>
+          
+           <Button
+              variant="contained"
+              color="primary"
+              style={{ marginTop: '20px' }}
+            >
+              <PayPalButtons
+                style={{ layout: 'horizontal' }}
+                createOrder={(data, actions) => {
+                  // Define the order details here
+                  return actions.order.create({
+                    purchase_units: [
+                      {
+                        amount: {
+                          currency_code: 'USD',
+                          value: paypalAmount.toFixed(2),
+                        },
+                      },
+                    ],
+                  });
+                }}
+                onApprove={( data, actions ) => {
+                  // Handle the transaction approval and redirection here
+                  return actions.order.capture().then((details) => {
+                    // Handle the success and redirection
+                    // You can redirect the user to a "Thank you" page or any other appropriate page.
+                    console.log('Transaction completed by ' + details.payer.name.given_name);
+                    console.log(details);
+
+                    // Dispatch an action to clear the cart
+                    dispatch(clearCart());
+
+                    // Optionally, set an alert message or perform other actions
+                   alert('Payment successful.');
+                  });
+                }}
+              />
+            </Button>
         </Grid>
         </>
       ) : (
-        <h2>Please go to the products page and add to the cart.</h2>
+        <h2>Cart is empty, please go to the products page and add to the cart.</h2>
       )}
     </div>
   );
 };
 
-export default Cart;
+export default Cart

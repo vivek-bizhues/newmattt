@@ -30,6 +30,7 @@ import ThemeComponent from 'src/@core/theme/ThemeComponent'
 import AuthGuard from 'src/@core/components/auth/AuthGuard'
 import GuestGuard from 'src/@core/components/auth/GuestGuard'
 
+import { PayPalScriptProvider } from '@paypal/react-paypal-js';
 // ** Spinner Import
 import Spinner from 'src/@core/components/spinner'
 
@@ -96,6 +97,12 @@ const App = props => {
   const aclAbilities = Component.acl ?? defaultACLObj
   console.log(store.getState());
 
+  const paypalOptions = {
+    'client-id': 'AcJ6dT7fk3l4xfzw5d7EnIe9UyGYv_pzCZDFx7tyboOImd_PXVBKuhLxKnuLSxli3GPRx-Cdw5vbcid0',
+     currency: 'USD',
+  };
+
+
   return (
     <Provider store={store}>
       <CacheProvider value={emotionCache}>
@@ -108,7 +115,7 @@ const App = props => {
           <meta name='keywords' content='Material Design, MUI, Admin Template, React Admin Template' />
           <meta name='viewport' content='initial-scale=1, width=device-width' />
         </Head>
-
+        <PayPalScriptProvider options={paypalOptions}>
         <AuthProvider>
           <SettingsProvider {...(setConfig ? { pageSettings: setConfig() } : {})}>
             <SettingsConsumer>
@@ -129,6 +136,7 @@ const App = props => {
             </SettingsConsumer>
           </SettingsProvider>
         </AuthProvider>
+       </PayPalScriptProvider>
       </CacheProvider>
     </Provider>
   )
