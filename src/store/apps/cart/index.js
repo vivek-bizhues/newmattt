@@ -29,7 +29,7 @@ const cartSlice = createSlice({
       }
       return state;
     },
-    clearCart: () => {
+    clearCart: () => {   
       if (typeof window !== 'undefined') {
         localStorage.removeItem('cart');
       }
